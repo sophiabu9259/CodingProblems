@@ -1,0 +1,289 @@
+List
+
+Collection and List Interface
+
+问题
+
+在上一节中，我们解决了一个简单的小问题：如何按顺序存储10个整数，并且把它们打印出来？ 我们使用了数组结构来解决这个问题，Java代码如下： public class Solution { public static void main(String[] args) { int[] numArray = new int[10]; for (int i = 0; i < 10; ++i) { numArray[i] = i; } for (int i = 0; i < 10; ++i) { System.out.print(numArray[i] + " "); } System.out.println(""); } }
+
+现在，我们来解决一个新的问题：可否存储第11个整数（数值设定为10），并将其打印出来呢？ 让我们在上文的代码基础上，再加两行： public class Solution { public static void main(String[] args) { int[] numArray = new int[10]; for (int i = 0; i < 10; ++i) { numArray[i] = i; } for (int i = 0; i < 10; ++i) { System.out.print(numArray[i] + " "); } // Add new number numArray[10] = 10; System.out.print(numArray[10] + " "); System.out.println(""); } } 我们来试着编译和运行上面的代码，如果大家有条件，可以暂停一下，自己试一试。 编译这一步，一切顺利，没有报错。现在，我们来运行这个程序，打印结果如下： 0 1 2 3 4 5 6 7 8 9 Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 10 at Solution.main(Solution.java:13) 可以看到，程序抛出了一个run time exception: ArrayIndexOutOfBoundsException。它发生在原程序的第13行，就是这一行： numArray[10] = 10; 为什么会发生这种现象？因为我们试图访问的内存块，已经超出了上面声明及初始化数组numArray时，占用的内存范围。我们访问的内存已经不再属于这个数组了，自然也就不会有数组中的元素。（有一个细节值得注意，对于这个问题，Java不会在编译阶段报错，而是留到运行时抛出异常。【说得不够清楚？】）
+
+以上的实验说明，我们不能够灵活地控制数组的长度。数组的长度，是初始化时已经决定的【声明还是初始化？】固定长度（fixed length)，初始化以后就无法再改变。因此，数组比较适合事先知道数据个数的场合，而对于需要灵活调整长度的场合，就不再合适了。
+
+有没有一种数据结构，既能完成数组线性储存数据的功能，又可以灵活地调整长度呢？
+
+这一节所介绍的List，就是一组满足这一要求的数据结构。List是Java的一个接口（Interface），有四种常见实现方法：ArrayList，LinkedList，Vector和Stack类。其中前三种支持数据的线性存储和定位。以ArrayList为例，我们可以这样解决上面提到的问题：
+
+public class Solution {
+    public static void main(String[] args) {
+        ArrayList<Integer> arrl = new ArrayList<Integer>();
+        for (int i = 0; i < 10; ++i) {
+            arrl.add(i);
+        }
+        arrl.add(10);
+
+
+        for (int i = 0; i <= 10; ++i) {
+            System.out.print(arrl.get(i) + " ");
+        }
+
+        System.out.println("");
+    }
+}
+输出如下： $ java Solution 0 1 2 3 4 5 6 7 8 9 10 这样，我们灵活调整数据结构长度的目标，就达到了。 为了更好地介绍两种List，我们首先来了解一下Collection这个概念，java的Collection系统，以及List接口。
+
+Collection
+
+“集合类”（Collections）这个概念，是指将其他实例归类的实例。比如，我有三个苹果，两个梨，将三个苹果放入一个袋子，两个梨放入另一个袋子，这两个装有水果的袋子，就形成了两个集合类实例。【集合类和容器的区别？能够用容器来形容集合类吗？】 在Java中，Collections这个概念，由Collection接口和Collections类来分别表述。Collection接口是一个高级接口，它包含了List，Set和Queue三个子接口。如图： 而Collections是一个类，它提供了一系列static方法，能够解决一些集合类的功能需求。比如，Collections.sort(List list)可以将传入的list参数进行排序（该方法的实现使用了优化后的Merge Sort算法）。
+
+实现集合接口的类，需要具备以下几个功能，括号中是对应的方法名：
+
+插入（add）
+删除（remove）
+搜索（contains）
+排序（sort）
+遍历和遍历器（iterator) 在上一节中，我们提到了遍历，Collection接口也需要实现遍历器功能。尽管我们可以将遍历简单地理解为访问集合类中的每一个元素各一次，但遍历的思想，其实比这一概念更加复杂。 对于一个数据结构而言，假如要访问所有的数据，相当于我们在走一个迷宫，迷宫的每一个checkpoint，我们都要走一遍。而“遍历”思想意味着，我们不仅要把所有的checkpoint都走一遍，而且在遍历过程中的每一个时间横截面上，我们都应该能够知道，我们走到哪里了。所以，我们需要一边走，一边更新一个“记号”，这个记号记录了我们目前所在的位置（或下一个checkpoint的位置）。【讲的不够清楚，为什么要这么设计？这种设计思想的精髓在哪里？】 那么，如何保存这个“记号”呢？面向对象编程的思想，使用了一个对象来记录我们在遍历过程中的某个时间点上的信息，这个对象就是遍历器（iterator）。 一个Collection的遍历器，需要实现Iterable接口，亦即返回一个遍历器对象iterator,这个对象支持以下方法：
+boolean hasNext() Returns true if the iteration has more elements.
+E next() Returns the next element in the iteration.
+void remove() Removes from the underlying collection the last element returned by this iterator (optional operation).
+每当我们产生一个遍历器，就开始了一个遍历的过程。我们通过hasNext方法来检测是否还有未遍历的元素，然后通过next方法来返回下一个未遍历的元素，还可以选择性地通过remove方法删除元素。
+
+对比（equals）
+哈希（hashCode）
+长度（size）
+转换为数组（toArray）
+List
+
+【图】 List是实现Collection接口的一个接口，是有序的Collection。
+
+和数组类似的是，使用List能准确控制每个元素插入的位置，也可以实现上一节所提到的定位功能。与数组不同的是，使用List可以灵活地控制数据结构长度，自由地增删数据。
+List允许有相同的元素。
+除了具有Collection接口必备的iterator()方法外，List还提供一个listIterator()方法，返回一个ListIterator，和标准的Iterator相比，ListIterator允许添加，删除，设定元素，还能向前或向后遍历。
+实现List接口的常用类有LinkedList，ArrayList，Vector和Stack。其中前三者支持数据的定位（即用index来准确访问数据结构中的某个元素），在这里介绍；Stack则稍后为大家介绍。
+ArrayList
+
+ArrayList，顾名思义，就是用数组来实现List接口的类。我们可以把ArrayList想象为一排内含物体的箱子，当我们需要插入一个新物体，我们就把一个新的箱子，推进这一排的某个位置。我们需要删除一个物体，就把它从箱子排列中拿走，再把右边的箱子推回来。因为是数组实现，ArrayList也同样具有无缝性（no holes），数据的存储是连续的。
+
+功能、方法及复杂度
+
+ArrayList支持的主要功能复杂度，如下表所示： |DS |Addition |Removal |Searching |Locating |Sort | |:--- |:---- |:----:| ----:| ----:| ----:|----:| |ArrayList (Unordered)| O(N) | O(N) | O(N) | O(1) |O(Nlog(N)) |
+
+为什么排序需要NLog(N)时间呢？我们后面会讲到排序的各种方法。
+
+常见的方法：
+
+add(object) : adds a new element to the end
+add(index, object) : inserts a new element at the specified index
+set(index, object) : replaces an existing element at the specified index with the new element.
+get(index) : returns the element at the specified index.
+remove(index) : deletes the element at the specified index.
+size() : returns the number of elements.
+contains
+iterator
+实现
+
+Simplified Implementation ArrayList，顾名思义，即用数组array实现的list。我们定义一个数组作为instance variable，该数组储存了list中需要储存的元素，并且根据需求，添加、删除、搜索、遍历元素。 1. 灵活控制：动态更新数组长度
+
+那么，ArrayList如何做到灵活地控制数据数量呢？理解这一点，是理解ArrayList实现最关键的部分。
+ArrayList的实现，是依靠动态更新内部数组的长度，来实现灵活控制长度的。
+
+对于加长数组的情况，ArrayList类中有这样一个private方法：EnsureCapacity，每当添加操作检测到list的新长度已经超过了内部数组的长度，它就新建一个更大的数组，把旧数组的内容移动进去，新添加的元素也添加到新数组中，然后用新的数组来替代旧的数组作为新的内部数组。Java中，旧的数组会被垃圾回收。
+
+每个ArrayList实例都有一个容量（Capacity），即用于存储元素的数组的大小。这个容量可随着不断添加新元素而自动增加，但是增长算法并没有定义。当需要插入大量元素时，在插入前可以调用ensureCapacity方法来增加ArrayList的容量以提高插入效率。目前java所用的增长函数是(oldCapacity*3)/2 + 1【后面是否改了？】;
+
+        public boolean add(E e) {
+                ensureCapacity(size+1); // Increments modCount!!
+                elementData[size++] = e;
+                return true;
+        }
+
+        public void ensureCapacity(int minCapacity) {
+                modCount++; // 维护线程安全用
+                int oldCapacity = elementData.length;
+                if (minCapacity > oldCapacity) {
+                    Object oldData[] = elementData;
+                    int newCapacity = (oldCapacity*3)/2 + 1;
+                    if (newCapacity < minCapacity)
+                        newCapacity = minCapacity;
+                    elementData = Arrays.copyOf(elementData, newCapacity);
+                }
+        }
+*modCount后面会提及
+
+*那么，如果删除了元素，使得实际需求的数组长度缩短了呢？【【trimToSize，要讲吗】】
+插入和删除（Insert/Remove）
+
+有了动态更新方法，添加和删除操作的实现就很直观了。
+
+ public Object remove(int index){
+     if(index < actSize){
+         Object obj = myStore[index];
+         myStore[index] = null;
+         int tmp = index;
+         while(tmp < actSize){
+             myStore[tmp] = myStore[tmp+1];
+             myStore[tmp+1] = null;
+             tmp++;
+         }
+         actSize--;
+         return obj;
+     } else {
+         throw new ArrayIndexOutOfBoundsException();
+     }
+ }
+Iterator/ListIterator 上面介绍List接口时谈到了iterator，遍历器。我们实现一个数据结构，都需要override这个iterator遍历器的功能，使得该类能够实现数据遍历。实现的方式，就是实现Iterable接口，就像之前提到的，它提供了一个iterator实例，该实例有hasNext, next和remove三个方法，其中remove是可选的。
+关键：listIterator为了能够修改，要引入modCount的概念。【需要详细讲吗？还是vector讲？】
+
+注意事项
+
+线程安全 源码实现中有一个modCount，它的作用在于：iterator遍历ArrayList的过程中，如果其他线程改变了该ArrayList的内在结构，需要通知iterator，及时抛出异常，就是检查modCount的数量。
+
+线性插入/删除 正如我们在上面的功能列表中所见，插入和删除操作在arrayList中都是线性时间O(N)的。为什么呢？想象我们在内部数组中，插入了一个元素，那么它右边的元素，就要顺序后移一位。我们可能会问，如果我就是在尾部插入或删除一个元素，没有元素需要后移，为什么会O(N)呢？这便涉及到average time和worst case time的概念。我们计算数据结构算法复杂度时，一般使用最坏情况时间，在这个例子中，就是插入和删除第一个元素的时间。
+
+均摊分析 add（也就是append）是一种特殊的插入，也就是插入最后一个元素。我们可以确切地知道，插入最后一个元素，没有其他元素需要移动，所以时间复杂度是O(1)。但是，我们刚才介绍过动态更新内部数组的原理，如果我们插入过程中，需要动态更新数组了，就要申请一块更大的新内存，把旧数组拷贝到新数组中，这个过程是O(N)的时间，为什么没有计入呢？ 这就涉及了平摊分析（Amortized Analysis）这个概念，它是一种求算法复杂度的分析方式。 在平摊分析中，执行一系列数据结构操作所需要的时间是通过执行的所有操作求平均而得出的。平摊分析可以用来证明在一系列操作中，通过对所有操作求平均之后，即使其中单一的操作具有较大的代价，平均代价还是很小的。在这个例子中，ArrayList的append，一般是O(1)，个别时候需要expand array，就不是O(1)了，但均摊到每个操作，还是O(1)。 我们需要注意，平摊分析和上面提到的average case/worst case是两个概念，它只是对操作求平均时间，而不是最坏的操作的时间。所以不涉及概率问题。平摊分析保证在最坏情况下，每个操作具有的平均性能。 平均分析的概念比较抽象，但只要我们结合这个例子，就会很好理解。它的意思就是说，即使个别情况下，数组需要动态更新，但绝大多数情况下，我们是不需要动态更新数组的，只要在旧数组里添加新的元素即可，所以当数据量足够大时，平均情况下，我们的add操作，就是O(1)时间完成的。
+
+LinkedList
+
+问题
+
+那么，既然插入/删除操作在ArrayList中是线性时间，假如我们每天需要增删许多数据，这种安排的速度就不够好了。我们有没有办法将其更加优化，变成O(1)的时间呢？这样，我们进行数据增删的效率就大大增加了。
+
+让我们来想象一下，现实中我们怎样解决这个问题。还是想象出一排箱子，ArrayList中，当我们需要插入一个新物体到某个位置，我们就要把它右边的箱子，往后移动一位，所以就有了O(N)的最坏情况复杂度。那么，有没有办法让每次插入，不需要移动右边的箱子，仍然可以记录箱子的顺序呢？
+
+你可能已经想到了。有一种办法，即使我们的箱子放的乱七八糟，每次插入都不需要移动箱子的位置，仍然可以记录它们的顺序。就是把这些箱子，用绳子串联起来。当我们要在箱子A和B之间增加物体的时候，把两个箱子的链接绳打开，箱子A链接到新的箱子上，再把新箱子链接到箱子B上，就完成了。不需要移动任何一个箱子，所以复杂度是O(1)。【图】
+
+这就是LinkedList的思想。LinkedList就是将一个个元素装入一个Node，再把Node用内部引用（绳子）链接起来，同样可以线性存储和访问数据。
+
+根据绳子链接的方向，LinkedList可以分成Singly LinkedList（只链接下一个箱子），Doubly LinkedList（两边都有链接）。后者可以进行回溯的遍历，比较方便，但是需要使用双倍的空间来储存下一个箱子的地址。 类似以空间换时间的策略，表现在很多数据结构的设计思想中，我们以后将会看到更多例子。我们这里介绍的主要是Singly LinkedList。
+
+功能、方法及复杂度
+
+当我们插入元素时，只要知道实在哪两个Node之间插入，插入的复杂度就是O(1)，删除同理，这就解决了ArrayList插入、删除线性时间的问题。此外，LinkedList还不需要动态更新内部数组，也节省了这部分时间。
+
+但是，这样的处理方式带来了另一个问题。在ArrayList中，我们可以迅速完成“打开第7个箱子”这个操作，只要走到第7个箱子面前就可以了。我们也可以把箱子从1到n编号，作用是一样的。但LinkedList中，完成这个操作就没那么容易了：箱子都是散乱堆放在一起的，搞清它们顺序的唯一方法，就是从第1个箱子往后找，找到第7个为止。所以，LinkedList中，定位功能是线性时间的。那么，当我们需要频繁地使用定位功能时，LinkedList就不适合了。
+
+以下是LinkedList各主要功能的时间复杂度。 |DS |Addition |Removal |Searching |Get Index |Sort | |:--- |:---- |:----:| ----:| ----:| ----:|----:| |LinkedList (Unordered)| O(1) | O(1) | O(N) | O(N) |O(Nlog(N)) |
+
+为什么sort也是Nlog(N)呢？Java的LinkedList的排序方法使用了一个workaround，就是将该list转换为ArrayList，然后使用了ArrayList的排序。因为转换过程是O(N)，在分析复杂度时可以忽略，所以复杂度还是Nlog(N)。
+
+常见方法：
+
+O(1)
+
+  addFirst(element: Object) : void
+  addLast(element: Object) : void
+  getFirst() : Object
+  getLast() : Object
+  removeFirst() : Object
+  removeLast() : Object
+O(N)
+insertAfter\(AnyType key, AnyType toInsert\) : void
+insertBefore\(AnyType key, AnyType toInsert\) \(triky\) : void
+iterator\(\) : Iterator<AnyType>
+insertAfter/insertBefore，就是搜索到一个元素，然后在它前面或后面添加一个元素。添加的部分复杂度为O(1)，搜索的部分复杂度为O(N)。
+
+在java中LinkedList Class并不能在iterator方法以外直接访问next/prev/data等instance variable，它是被封装的。但是，LeetCode中经常会有直接使用LinkedList的ivar的题目，此时可以直接访问。所以，熟悉用prev,next,curr来遍历、插入、删除和访问是很有用的。
+
+实现
+
+实现LinkedList可以分成两部分去理解。第一部分，是实现它的基本结构，即内含的Node结构。第二部分，是使用Node内部类，实现List的各种方法及LinkedList独特的方法。
+
+Node 内含的Node结构怎样实现？这就涉及了Java嵌套类的概念，即“类中之类”——声明在另一个类里面的类。我们需要的内部Node就是用嵌套类定义的。 嵌套类根据声明时是否使用static关键字，分为两类。就像static方法一样，static嵌套类是附着在大类上面的，所以不能访问外面的外部类（outer class）的内容; non-static嵌套类则是附着在大类的具体每个实例上面的，所以可以访问外部类内容，即使private也可以。我们的Node类不需要访问外部类内容，所以是static嵌套类。【举一个不抽象的例子】
+
+class OuterClass { ....
+    class NestedClass { ....
+    }
+}
+Node实现： private static class Node { private AnyType data; private Node next;
+
+    public Node(AnyType data, Node<AnyType> next) {
+        this.data = data;
+        this.next = next;
+    }
+}
+Methods
+
+Constructor 有了内部类，我们就可以利用它来实现LinkedList了。我们只须对每一个实例保存该list的第一个node，也就是head node，就可以实现它的所有方法。
+
+ public MySinglyLinkedList() {
+     head = null;
+ }
+addFirst 像addFirst这样的方法，实现方式是非常直观的，只要完成“重新链接”的过程就可以了。 public void addFirst(AnyType data) {
+   head = new Node<AnyType>\(data, head\);
+}
+insertBefore 一个比较难实现的方法是insertBefore，就是先找到一个元素，再往它前面添加一个元素。难度在于，当我们找到这个元素时，我们已经失去了它自己的链接，只有它自带的next链接。那么，我们在找它的时候，就需要能够一次“看到”两个元素，当第二个元素符合搜索条件时，在第一和第二个元素中间插入新元素。（画图讲思路） public void insertBefore(AnyType key, AnyType toInsert) { Node tmp = head; if (head == null) return;
+
+     // Edge case for head containing key, insert a new node before head
+     if (head.data.equals(key)) {
+         head = new Node<AnyType>(toInsert, head);
+         return;
+     }
+
+     while (tmp.next != null && !tmp.next.data.equals(key))
+         tmp = tmp.next;
+
+     if (tmp.next != null) {
+         tmp.next = new Node<AnyType>(toInsert, tmp.next);
+     }
+ }
+remove一个特定元素，也就是搜索之后再删除 public void remove(AnyType key) {
+       if \(head == null\)
+           return;
+       if \(head.data.equals\(key\)\) {
+           head = null;
+       }
+       else {
+           Node<AnyType> tmp = head;
+           while \(tmp.next != null && !tmp.next.data.equals\(key\)\)
+               tmp = tmp.next;
+           if \(tmp.next != null\)
+               tmp.next = tmp.next.next;
+       }
+}
+reverseLinkedList 一般API里不会有，但是是经典考题。给一个head，把list的连接关系反过来，返回一个linkedList的新head。 有recursive和iterative两种经典的写法。 // Iterative public ListNode reverseList(ListNode head) { if (head == null || head.next == null) return head; ListNode prev = null, cur = head; ListNode next;
+
+     while (cur != null) {
+         next = cur.next;
+         cur.next = prev;
+         prev = cur;
+         cur = next;
+     }
+
+     return prev;
+ }
+
+ // Recursive
+ public ListNode reverseList(ListNode head) {
+     if (head == null || head.next == null) return head;
+     ListNode second = head.next;
+     head.next = null;
+
+     ListNode rest = reverseList(second);
+     second.next = head;
+
+     return rest;
+ }
+Thread Safe Lists
+
+现在我们介绍了ArrayList和LinkedList两种实现List的方法，我们可以把它们都想象为箱子，只是用不同的方法存储顺序信息。那么，如果操作箱子的不是一个工人，而是两个工人，每个工人只知道自己上次操作时箱子的情况，这两种数据结构还能发挥它本来的作用吗？
+
+比如说，如果一个工人想要拿走箱子A，但是另一个工人在他到来之前，已经把箱子A拿走了，他就找不到箱子A了。或者，如果箱子A是第7个箱子，他仍然能找到第7个箱子，但它已经不是箱子A，而是另一个箱子了。
+
+很显然，我们介绍的两种List都无法解决这个问题。第二个工人可能会一脸茫然，也可能搬走错误的箱子。许多现代计算机语言使用多线程(multi-threading）的方式，来增加处理任务的效率，就像我们使用很多个工人搬箱子一样，很容易引起冲突问题。一种解决这个问题的方法，是对操作”上锁“。对于某一项操作，比如insertBefore，在完成之前，其他工人不可以动这些箱子。完成之后，数据结构更新，其他工人再访问这些箱子时，就知道了新的情况。这样做降低了工作的效率，但保证了工作的安全。经过这样处理的数据结构，就是线程安全的——多线程工作时可以照常使用这些数据结构而不发生冲突。【操作上锁还是整个结构都上锁？】
+
+Java为我们提供了两个方便的机制，提供线程安全的List。 1. Collections.synchronizedList Returns a synchronized (thread-safe) list backed by the specified list. In order to guarantee serial access, it is critical that all access to the backing list is accomplished through the returned list.
+
+    List list = Collections.synchronizedList(new LinkedList(...));
+Vector 怎么实现线程安全的？
+
+Vector implements a dynamic array. It is similar to ArrayList, but with two differences:
+
+Vector is synchronized 线程安全. This means if one thread is working on Vector, no other thread can get a hold of it. Unlike ArrayList, only one thread can perform an operation on vector at a time.
+Vector contains many legacy methods that are not part of the collections framework.
+Vector proves to be very useful if you don't know the size of the array in advance or you just need one that can change sizes over the lifetime of a program.
+
+//不讲了 Fail fast Vector is fail fast.If the Vector is structurally modified at any time after the Iterator is created, in any way except through the Iterator’s own remove or add methods, the Iterator will throw a ConcurrentModificationException.
+
+ArrayList iterator is also fail-fast.
+
+*148LinkedList用merge来sort LinkedList 不讲代码了
