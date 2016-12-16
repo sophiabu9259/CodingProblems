@@ -2,13 +2,19 @@ package lcArraysLinkedListsStrings;
 
 import java.util.Arrays;
 
+/**
+ * About Optimization: Sorting takes O(nlogn) time. If we want to try O(logn) time for each element in nums as tuple[0], we have to find the closest
+ * in logn time. Right now there is no approach for finding this pair within O(logn) time.
+ * @author xuechao
+ *
+ */
 public class ThreeSumClosest {
 	public int threeSumClosest (int[] nums, int target) {
 		
 		if (nums == null || nums.length < 3) return 0;
-		
 		Arrays.sort(nums);
 		
+		//update min and res when finding a smaller distance to the target
 		int min = Integer.MAX_VALUE;
 		int i = 0;
 		int res = 0;
@@ -22,7 +28,7 @@ public class ThreeSumClosest {
 					min = Math.abs(temp - target);
 					res = temp;
 				} 
-				
+				//no matter we updated min or not, try to approach the target.
 				if (temp < target) {
 					j++;
 				} else {
