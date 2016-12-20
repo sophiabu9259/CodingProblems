@@ -3,41 +3,56 @@ package lcArraysLinkedListsStrings;
 import basicstructures.RandomListNode;
 
 /**
- * make a map connection from each node to its shadow node. Notice the end.
+ * Use next pointer to map old to new while keeping the old next in new's next
+ * 3 passes: build mapping with next, build random and reconstruct next. 
  * @author Xuechao
  *
  */
 public class CopyRandomList {
-	public RandomListNode deepCopyRandom (RandomListNode head) {
-		RandomListNode p = head;
-		if ( p == null) {
-			return p;
+	public RandomListNode copyRandomList(RandomListNode head) {
+		RandomListNode res = null;
+		RandomListNode cur = head;
+		
+		if (head == null) return res;
+
+		while (cur != null) {
+			RandomListNode shadow = new RandomListNode (cur.label);
+			shadow.next = cur.next;
+			cur.next = shadow;
+			cur = shadow.next;
 		}
-		
-		while (p!=null) {
-			RandomListNode shadow = new RandomListNode(p.label);
-			shadow.next = p.next;
-			p.next = shadow;
-			p = shadow.next;
+
+		cur = head;
+
+		while (cur != null) {
+			RandomListNode shadow = cur.next;
+			shadow.random = cur.random == null? null : cur.random.next;
+			cur = shadow.next;
 		}
-		
-		p = head;
-		while (p!=null) {
-			if (p.random != null) {
-				p.next.random = p.random.next;
-			}	
-			p = p.next.next;
+
+		cur = head;
+		res = cur.next;
+
+		while (cur != null) {
+			RandomListNode shadow = cur.next;
+			cur.next = shadow.next; 
+			shadow.next = cur.next == null? null : cur.next.next;
+			cur = cur.next;
 		}
+
+		return res;
+    }
+	
+	public static void main (String[] args) {
+		RandomListNode a = new RandomListNode (-1);
 		
-		p = head.next.next;
-		RandomListNode q = head.next;
+		CopyRandomList o = new CopyRandomList();
+		RandomListNode b = o.copyRandomList(a);
 		
-		while (p!=null) {
-			q.next = p.next;
-			p = p.next.next;
-			q = q.next;
+		boolean result = true;
+		while (b != null) {
+			System.out.println ("Label: " + b.label);
+			b = b.next;
 		}
-		
-		return  head.next;
 	}
 }
