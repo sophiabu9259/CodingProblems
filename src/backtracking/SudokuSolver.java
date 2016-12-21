@@ -1,4 +1,6 @@
 package backtracking;
+
+
 /**
  * Don't use void helper. Use boolean helper. Only for '.' positions, try from '1' to '9'. If valid, try and recursion in.
  * if '1' to '9' all failed vailidation, returen false, stop this branch.
@@ -7,6 +9,56 @@ package backtracking;
  *
  */
 public class SudokuSolver {
+	public void solve (char[][] board) {
+		backtracking2 (board, 0 , 0);
+	}
+
+	public boolean backtracking2 (char[][] board, int row, int col) {
+		if (row == 9) return true;
+		int nextRow = row + (col + 1)/9;
+		int nextCol = (col + 1) % 9;
+
+		if (board[row][col] == '.') {
+			for (int i = 1; i < 10; ++i) {
+				char ch = (char) (i + '0');
+				if (isValidCell (board, row, col, ch)) {
+					board[row][col] = ch;
+					if (backtracking2 (board, nextRow, nextCol)) return true;
+				}
+			}
+			board[row][col] = '.';
+		} else {
+			if (backtracking2 (board, nextRow, nextCol)) return true;
+		}
+
+		return false;
+
+	}
+
+	public boolean isValidCell (char[][] board, int x, int y, char ch) {
+
+		for (int j = 0; j < 9; ++j) {
+			if (board[x][j] == ch) return false; 
+		}
+
+		for (int i = 0; i < 9; ++i) {
+			if (board[i][y] == ch) return false;
+		}
+
+		int a = x / 3;
+		int b = y / 3;
+
+		for (int i = 3 * a; i < 3 * a + 3; ++i) {
+			for (int j = 3 * b; j < 3 * b + 3; ++j) {
+				if (board[i][j] == ch) return false;
+			}
+		}
+
+		return true;
+	}
+	/*
+	 * ---------------------------------------------------------------Extension--------------------------------------------------------
+	 */
 	boolean[][] checkCol;
 	boolean[][] checkRow;
 	boolean[][][] checkSub;
@@ -146,6 +198,4 @@ public class SudokuSolver {
 		checkSub = new boolean[(int) Math.sqrt(board.length)][(int) Math.sqrt(board.length)][board[0].length];
 		//to do...
     }
-	
-	
 }
