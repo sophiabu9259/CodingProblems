@@ -49,7 +49,6 @@ public class CopyRandomList {
 		CopyRandomList o = new CopyRandomList();
 		RandomListNode b = o.copyRandomList(a);
 		
-		boolean result = true;
 		while (b != null) {
 			System.out.println ("Label: " + b.label);
 			b = b.next;
