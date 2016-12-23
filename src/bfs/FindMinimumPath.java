@@ -7,6 +7,13 @@ import java.util.Arrays;
 
 public class FindMinimumPath {
 	public List<int[]> pathfinding (int[][] matrix, int[] start, int[] end) {
+		/**
+		 * Notice to trace a BFS path, two method:
+		 * 1. use a list to record all the path we had.
+		 * 2. for integers only map, you can also use an array to record parent of each node.
+		 *    for others, use a map to record parent.
+		 * 
+		 */
 		List<int[]> res = new ArrayList<>();
 		if (matrix == null || start == null || end == null || start.length != 2 || end.length != 2) return res;
 
