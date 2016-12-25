@@ -28,11 +28,11 @@ public class EditDistanceToPalindrome {
 	
 	public static void main (String[] args) {
 		String[] testsuite = {
-				"", "a", "aa", "ab", "abcde", "cEgbc", "cEagac"
+				"", "a", "aa", "ab", "abcde", "cEgbc", "cEagac", "mohammadsajjadhossain", "xuechaow"
 		};
 		
 		int[] resultList = {
-				0, 0, 0, 1, 2, 1, 1
+				0, 0, 0, 1, 2, 1, 1, 8, 4
 		};
 		
 		EditDistanceToPalindrome o = new EditDistanceToPalindrome();
