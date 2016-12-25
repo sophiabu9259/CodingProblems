@@ -35,5 +35,18 @@ public class LRUCacheTest {
 		
 	}
 	
+	@Test
+	public void test4() {
+		myCache = new LRUCache (2);
+		myCache.set(2, 1);
+		myCache.set(1, 1);
+		assertEquals ("inserted 2 pairs, querying first", 1, myCache.get(2));
+		myCache.set(4, 1);
+		myCache.get(1);
+		assertEquals ("inserted 3 pairs, querying second should be missing", -1, myCache.get(1));
+		myCache.get(2);
+		assertEquals ("inserted 3 pairs, querying first should be found", 1, myCache.get(2));
+	}
+	
 
 }
