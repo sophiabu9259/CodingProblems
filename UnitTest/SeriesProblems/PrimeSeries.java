@@ -57,7 +57,38 @@ public class PrimeSeries {
     }
 
     public int sqrt (int n) {
-    	return 0;
+if ( n == 0 || n == 1) return n;
+		
+		int lo = 1;
+		int hi = n/2 + 1;
+		/* FOR ROUND UP USE THIS
+		int minDist = Integer.MAX_VALUE;
+		int min = 0;
+		*/
+		/* FOR ROUND DOWN USE THIS */
+		int last = 0;
+		
+		while (lo < hi) {
+		    int mid = lo + (hi - lo) / 2;
+		    int sqTemp = n / mid;
+		    if (sqTemp == mid) return mid;
+		    
+		    /* FOR ROUND UP USE THIS
+		    if (Math.abs(n - sqTemp) < minDist) {
+		            minDist = Math.abs(n - sqTemp);
+		            min = mid;
+		    }
+		    */
+		    
+		    if (sqTemp < mid) {
+		        hi = mid;
+		    } else {
+		        lo = mid + 1;
+		        last = mid;
+		    }
+		}
+		
+		return last;
     }
     
 }
