@@ -9,6 +9,7 @@ public class EditDistanceToPalindrome {
 		 * 3. get the min of insertion/deleteion(notice two directions to do this) and replacing one char. 
 		 * in abgEa casem replacing takes 1, insertion/deletion takes 2
 		 * 4. can also be done in dynamic programming similarly
+		 * 5. similar to burst balloons
 		 */
 		return util (s, 0, s.length() - 1);
 	}
